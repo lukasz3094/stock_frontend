@@ -5,6 +5,7 @@
       <v-spacer></v-spacer>
       <v-btn text to="/">Home</v-btn>
       <v-btn text to="/about">About</v-btn>
+      <v-btn v-if="authStore.isAuthenticated" text to="/dashboard">Dashboard</v-btn>
       <v-btn v-if="!authStore.isAuthenticated" text to="/auth">Login</v-btn>
       <v-btn v-else text @click="logout">Logout</v-btn>
     </v-app-bar>

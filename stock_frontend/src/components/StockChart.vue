@@ -6,15 +6,14 @@
       :series="series"
       :options="chartOptions"
     />
-    <div v-if="volatilityMessage" class="volatility-message">
-      {{ volatilityMessage }}
-    </div>
+    <InterpretationView v-if="ticker" :symbol="ticker" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import LightweightChart from './LightweightChart.vue';
+import InterpretationView from './InterpretationView.vue';
 import { getCompanyHistory, getPredictions } from '@/services/company_api';
 
 const props = defineProps<{
@@ -24,8 +23,6 @@ const props = defineProps<{
 const chartComponent = ref(null);
 const historyData = ref([]);
 const predictionData = ref([]);
-const garchData = ref([]);
-const volatilityMessage = ref('');
 
 const chartOptions = {
   layout: {
@@ -100,7 +97,6 @@ watch(() => props.ticker, async (newTicker) => {
       historyData.value = await getCompanyHistory(newTicker);
       const predictions = await getPredictions(newTicker);
       predictionData.value = predictions.arima_forecast;
-      garchData.value = predictions.garch_forecast;
 
       if (chartComponent.value && predictionData.value.length > 0) {
         const to = predictionData.value[predictionData.value.length - 1].target_date;
@@ -109,36 +105,9 @@ watch(() => props.ticker, async (newTicker) => {
         chartComponent.value.setVisibleRange({ from: from.toISOString().split('T')[0], to });
       }
 
-      if (garchData.value.length > 0 && predictionData.value.length > 0) {
-        const avgVolatility = garchData.value.reduce((acc, item) => acc + item.predicted_volatility, 0) / garchData.value.length;
-        const avgPrice = predictionData.value.reduce((acc, item) => acc + item.predicted_value, 0) / predictionData.value.length;
-        const volatilityPercentage = (avgVolatility / avgPrice) * 100;
-
-        if (volatilityPercentage > 5) {
-          volatilityMessage.value = "High volatility expected. The stock price may experience significant fluctuations.";
-        } else if (volatilityPercentage < 1) {
-          volatilityMessage.value = "Low volatility expected. The stock price is expected to be stable.";
-        } else {
-          volatilityMessage.value = "Medium volatility expected. The stock price may experience moderate fluctuations.";
-        }
-      } else {
-        volatilityMessage.value = '';
-      }
     } catch (error) {
       console.error('Error fetching chart data:', error);
-      volatilityMessage.value = '';
     }
   }
 });
 </script>
-
-<style scoped>
-.volatility-message {
-  margin-top: 16px;
-  padding: 12px;
-  background-color: #232f3e;
-  border-radius: 4px;
-  color: #D1D4DC;
-  text-align: center;
-}
-</style>

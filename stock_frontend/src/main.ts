@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { useAuthStore } from '@/stores/auth'
 
 import App from './App.vue'
 import router from './router'
@@ -39,7 +40,12 @@ const vuetify = createVuetify({
 
 const app = createApp(App)
 
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
+
+const authStore = useAuthStore()
+authStore.setRouter(router)
+
 app.use(router)
 app.use(vuetify)
 

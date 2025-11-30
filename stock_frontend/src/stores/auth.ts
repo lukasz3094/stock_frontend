@@ -1,25 +1,35 @@
 import { defineStore } from 'pinia';
 import axios from 'axios';
+import type { Router } from 'vue-router';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+interface AuthState {
+  token: string | null;
+  error: string | null;
+  router: Router | null;
+}
+
 export const useAuthStore = defineStore('auth', {
-  state: () => ({
+  state: (): AuthState => ({
     token: localStorage.getItem('token') || null,
-    error: null as string | null,
+    error: null,
+    router: null,
   }),
   getters: {
     isAuthenticated: (state) => !!state.token,
   },
   actions: {
+    setRouter(router: Router) {
+      this.router = router;
+    },
     async register(email: string, password: string) {
       this.error = null;
       try {
-        await axios.post(`${API_URL}/register`, {
+        await axios.post(`${API_URL}/api/v1/register`, {
           email,
           password,
         });
-        // After successful registration, automatically log in the user
         await this.login(email, password);
       } catch (error) {
         if (axios.isAxiosError(error)) {
@@ -37,7 +47,7 @@ export const useAuthStore = defineStore('auth', {
         params.append('username', email);
         params.append('password', password);
         
-        const response = await axios.post(`${API_URL}/login`, params, {
+        const response = await axios.post(`${API_URL}/api/v1/login`, params, {
           headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
@@ -47,9 +57,9 @@ export const useAuthStore = defineStore('auth', {
         this.token = access_token;
         localStorage.setItem('token', access_token);
         
-        // You might want to redirect the user to a different page
-        // For example, using the router instance
-        // this.router.push('/'); 
+        if (this.router) {
+          this.router.push('/dashboard');
+        }
       } catch (error) {
         if (axios.isAxiosError(error)) {
           this.error = error.response?.data?.detail || 'An error occurred during login.';
@@ -62,8 +72,9 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.token = null;
       localStorage.removeItem('token');
-      // You might want to redirect the user to the login page
-      // this.router.push('/auth');
+      if (this.router) {
+        this.router.push('/login');
+      }
     },
   },
 });

@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
 import { useAuthStore } from '@/stores/auth'
 
 const router = createRouter({
@@ -8,20 +7,23 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: HomeView
+      redirect: () => {
+        const authStore = useAuthStore()
+        return authStore.isAuthenticated ? '/dashboard' : '/login'
+      }
     },
     {
-      path: '/about',
-      name: 'about',
-      // route level code-splitting
-      // this generates a separate chunk (About.[hash].js) for this route
-      // which is lazy-loaded when the route is visited.
-      component: () => import('../views/AboutView.vue')
-    },
-    {
-      path: '/auth',
-      name: 'auth',
-      component: () => import('../views/AuthView.vue')
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/AuthView.vue'),
+      beforeEnter: (to, from, next) => {
+        const authStore = useAuthStore()
+        if (authStore.isAuthenticated) {
+          next({ name: 'dashboard' })
+        } else {
+          next()
+        }
+      }
     },
     {
       path: '/dashboard',
@@ -32,7 +34,7 @@ const router = createRouter({
         if (authStore.isAuthenticated) {
           next()
         } else {
-          next({ name: 'auth' })
+          next({ name: 'login' })
         }
       }
     }

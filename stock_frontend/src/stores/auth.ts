@@ -33,7 +33,11 @@ export const useAuthStore = defineStore('auth', {
         await this.login(email, password);
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          this.error = error.response?.data?.detail || 'An error occurred during registration.';
+          if (Array.isArray(error.response?.data?.detail)) {
+            this.error = error.response.data.detail.map((err: any) => err.msg).join('; ');
+          } else {
+            this.error = error.response?.data?.detail || 'An error occurred during registration.';
+          }
         } else {
           this.error = 'An unexpected error occurred during registration.';
         }
@@ -62,7 +66,11 @@ export const useAuthStore = defineStore('auth', {
         }
       } catch (error) {
         if (axios.isAxiosError(error)) {
-          this.error = error.response?.data?.detail || 'An error occurred during login.';
+          if (Array.isArray(error.response?.data?.detail)) {
+            this.error = error.response.data.detail.map((err: any) => err.msg).join('; ');
+          } else {
+            this.error = error.response?.data?.detail || 'An error occurred during login.';
+          }
         } else {
           this.error = 'An unexpected error occurred during login.';
         }

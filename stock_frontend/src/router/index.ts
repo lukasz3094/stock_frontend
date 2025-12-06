@@ -9,8 +9,13 @@ const router = createRouter({
       name: 'home',
       redirect: () => {
         const authStore = useAuthStore()
-        return authStore.isAuthenticated ? '/dashboard' : '/login'
+        return authStore.isAuthenticated ? '/dashboard' : '/welcome'
       }
+    },
+    {
+      path: '/welcome',
+      name: 'welcome',
+      component: () => import('../views/WelcomeView.vue')
     },
     {
       path: '/login',
@@ -34,7 +39,7 @@ const router = createRouter({
         if (authStore.isAuthenticated) {
           next()
         } else {
-          next({ name: 'login' })
+          next({ name: 'welcome' })
         }
       }
     }

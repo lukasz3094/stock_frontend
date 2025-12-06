@@ -1,88 +1,125 @@
-<template>
-  <v-container class="fill-height" fluid>
-    <v-row align="center" justify="center">
-      <v-col cols="12" sm="8" md="4">
-        <v-card class="elevation-12">
-          <v-toolbar color="primary" dark flat>
-            <v-toolbar-title>{{ isLogin ? 'Login' : 'Register' }}</v-toolbar-title>
-          </v-toolbar>
-          <v-card-text>
-            <v-form @submit.prevent="handleSubmit">
-              <v-text-field
-                label="Email"
-                name="email"
-                prepend-icon="mdi-account"
-                type="email"
-                v-model="email"
-                required
-              ></v-text-field>
-              <v-text-field
-                id="password"
-                label="Password"
-                name="password"
-                prepend-icon="mdi-lock"
-                type="password"
-                v-model="password"
-                required
-              ></v-text-field>
-              <v-text-field
-                v-if="!isLogin"
-                id="confirm-password"
-                label="Confirm Password"
-                name="confirm-password"
-                prepend-icon="mdi-lock"
-                type="password"
-                v-model="confirmPassword"
-                required
-              ></v-text-field>
-              <v-alert v-if="error" type="error" dense>
-                {{ error }}
-              </v-alert>
-            </v-form>
-          </v-card-text>
-          <v-card-actions>
-            <v-btn text @click="isLogin = !isLogin">{{ isLogin ? 'Register' : 'Login' }}</v-btn>
-            <v-spacer></v-spacer>
-            <v-btn color="primary" @click="handleSubmit">{{ isLogin ? 'Login' : 'Register' }}</v-btn>
-          </v-card-actions>
-        </v-card>
-      </v-col>
-    </v-row>
-  </v-container>
-</template>
-
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import welcomeBg from '@/assets/welcome_bg.png';
 
 const isLogin = ref(true);
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
 const error = ref<string | null>(null);
+const loading = ref(false);
 
 const authStore = useAuthStore();
 const router = useRouter();
 
 const handleSubmit = async () => {
   error.value = null;
+  loading.value = true;
   try {
     if (!isLogin.value) {
       if (password.value !== confirmPassword.value) {
         error.value = 'Passwords do not match';
+        loading.value = false;
         return;
       }
       await authStore.register(email.value, password.value);
     } else {
       await authStore.login(email.value, password.value);
     }
-    router.push('/');
-  } catch {
-    error.value = authStore.error;
+    router.push('/dashboard');
+  } catch(err) {
+    error.value = authStore.error || 'An unknown error occurred.';
+  } finally {
+    loading.value = false;
   }
 };
 </script>
 
+<template>
+  <v-img :src="welcomeBg" cover class="fill-height">
+    <div class="overlay"></div>
+    <v-container fluid class="fill-height pa-0" style="position: relative;">
+      <v-row no-gutters class="fill-height">
+        <!-- Info Column -->
+        <v-col cols="12" md="6" class="d-none d-md-flex align-center justify-center pa-10 pl-16 text-center text-white">
+          <div>
+            <v-icon size="64" class="mb-4">mdi-finance</v-icon>
+            <h2 class="text-h4 font-weight-bold mb-4">Odkryj Finansowe Spostrzeżenia</h2>
+            <p class="text-subtitle-1">
+              Dołącz do nas, aby uzyskać dostęp do analityki predykcyjnej i interpretacji rynkowych opartych na AI.
+            </p>
+          </div>
+        </v-col>
+        
+        <!-- Form Column -->
+        <v-col cols="12" md="6" class="d-flex align-center justify-center">
+          <v-card class="glowing-card pa-4" width="100%" max-width="400px">
+            <v-card-title class="text-center text-h5 mb-4">{{ isLogin ? 'Witaj Ponownie' : 'Utwórz Konto' }}</v-card-title>
+            <v-card-text>
+              <v-form @submit.prevent="handleSubmit">
+                <v-text-field
+                  label="Email"
+                  name="email"
+                  prepend-inner-icon="mdi-email-outline"
+                  type="email"
+                  v-model="email"
+                  required
+                  variant="outlined"
+                ></v-text-field>
+                <v-text-field
+                  id="password"
+                  label="Hasło"
+                  name="password"
+                  prepend-inner-icon="mdi-lock-outline"
+                  type="password"
+                  v-model="password"
+                  required
+                  variant="outlined"
+                ></v-text-field>
+                <v-text-field
+                  v-if="!isLogin"
+                  id="confirm-password"
+                  label="Potwierdź Hasło"
+                  name="confirm-password"
+                  prepend-inner-icon="mdi-lock-outline"
+                  type="password"
+                  v-model="confirmPassword"
+                  required
+                  variant="outlined"
+                ></v-text-field>
+                <p v-if="error" class="text-error text-caption mb-4">
+                  {{ error }}
+                </p>
+                <v-btn :loading="loading" color="primary" block size="large" @click="handleSubmit">{{ isLogin ? 'Zaloguj' : 'Zarejestruj' }}</v-btn>
+              </v-form>
+            </v-card-text>
+            <v-card-actions class="justify-center">
+              <v-btn text @click="isLogin = !isLogin">{{ isLogin ? 'Potrzebujesz konta? Zarejestruj się' : 'Masz już konto? Zaloguj się' }}</v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-img>
+</template>
+
 <style scoped>
+.overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(10, 10, 10, 0.25);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.glowing-card {
+  background-color: rgba(30, 30, 30, 0.6) !important;
+  box-shadow: 0 0 20px 5px rgba(0, 200, 255, 0.2);
+  border-radius: 16px !important;
+}
 </style>

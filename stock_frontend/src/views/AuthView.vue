@@ -2,7 +2,9 @@
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
-import welcomeBg from '@/assets/welcome_bg.png';
+import welcomeBgAsset from '@/assets/welcome_bg.png';
+
+const welcomeBg = welcomeBgAsset;
 
 const isLogin = ref(true);
 const email = ref('');
@@ -29,7 +31,7 @@ const handleSubmit = async () => {
       await authStore.login(email.value, password.value);
     }
     router.push('/dashboard');
-  } catch(err) {
+  } catch {
     error.value = authStore.error || 'An unknown error occurred.';
   } finally {
     loading.value = false;

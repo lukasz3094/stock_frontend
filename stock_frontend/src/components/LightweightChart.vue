@@ -2,36 +2,51 @@
   <div ref="chartContainer" class="chart-container"></div>
 </template>
 
-<script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue';
-import * as LightweightCharts from 'lightweight-charts';
+<script setup lang="ts">
+import { ref, onMounted, onUnmounted, watch, type Ref } from 'vue';
+import {
+  createChart,
+  AreaSeries,
+  LineSeries,
+  CandlestickSeries,
+  type IChartApi,
+  type ISeriesApi,
+  type SeriesType,
+  type ChartOptions,
+  type AreaSeriesOptions,
+  type LineSeriesOptions,
+  type CandlestickSeriesOptions,
+} from 'lightweight-charts';
+import type { ChartSeries } from '@/types/chart';
 
-const props = defineProps({
-  series: {
-    type: Array,
-    required: true,
-  },
-  options: {
-    type: Object,
-    default: () => ({}),
-  },
-});
+const props = defineProps<{
+  series: ChartSeries[];
+  options: ChartOptions;
+}>();
 
-const chartContainer = ref(null);
-let chart = null;
-const seriesRefs = [];
+const chartContainer: Ref<HTMLElement | null> = ref(null);
+let chart: IChartApi | null = null;
+const seriesRefs: ISeriesApi<SeriesType>[] = [];
 
 onMounted(() => {
-  chart = LightweightCharts.createChart(chartContainer.value, props.options);
+  if (!chartContainer.value) {
+    console.error('Chart container not found');
+    return;
+  }
+  chart = createChart(chartContainer.value, props.options) as IChartApi;
+
+  if (!chart) {
+    throw new Error('Failed to create chart');
+  }
 
   props.series.forEach(s => {
-    let series;
+    let series: ISeriesApi<SeriesType> | undefined;
     if (s.type === 'area') {
-      series = chart.addSeries(LightweightCharts.AreaSeries, s.options);
+      series = chart!.addSeries(AreaSeries, s.options as AreaSeriesOptions);
     } else if (s.type === 'line') {
-      series = chart.addSeries(LightweightCharts.LineSeries, s.options);
+      series = chart!.addSeries(LineSeries, s.options as LineSeriesOptions);
     } else if (s.type === 'candlestick') {
-      series = chart.addSeries(LightweightCharts.CandlestickSeries, s.options);
+      series = chart!.addSeries(CandlestickSeries, s.options as CandlestickSeriesOptions);
     }
     if (series) {
       series.setData(s.data);
@@ -39,25 +54,27 @@ onMounted(() => {
     }
   });
 
-  chart.timeScale().fitContent();
+  chart?.timeScale().fitContent();
 });
 
 watch(
   () => props.series,
   (newSeries) => {
-    if (!chart) return;
+    if (!chart) 
+      throw new Error('Chart not initialized');
     
-    seriesRefs.forEach(s => chart.removeSeries(s));
+    seriesRefs.forEach(s => chart?.removeSeries(s));
     seriesRefs.length = 0;
 
     newSeries.forEach(s => {
-      let series;
+      if (!chart) return;
+      let series: ISeriesApi<SeriesType> | undefined;
       if (s.type === 'area') {
-        series = chart.addSeries(LightweightCharts.AreaSeries, s.options);
+        series = chart!.addSeries(AreaSeries, s.options as AreaSeriesOptions);
       } else if (s.type === 'line') {
-        series = chart.addSeries(LightweightCharts.LineSeries, s.options);
+        series = chart!.addSeries(LineSeries, s.options as LineSeriesOptions);
       } else if (s.type === 'candlestick') {
-        series = chart.addSeries(LightweightCharts.CandlestickSeries, s.options);
+        series = chart!.addSeries(CandlestickSeries, s.options as CandlestickSeriesOptions);
       }
       if (series) {
         series.setData(s.data);
@@ -84,7 +101,7 @@ onUnmounted(() => {
   }
 });
 
-const setVisibleRange = (range) => {
+const setVisibleRange = (range: { from: string; to: string }) => {
   if (chart) {
     chart.timeScale().setVisibleRange(range);
   }
@@ -93,6 +110,7 @@ const setVisibleRange = (range) => {
 defineExpose({
   setVisibleRange,
 });
+
 </script>
 <style scoped>
 .chart-container {

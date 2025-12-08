@@ -1,5 +1,7 @@
 <script setup lang="ts">
-import welcomeBg from '@/assets/welcome_bg.png';
+import welcomeBgAsset from '@/assets/welcome_bg.png';
+
+const welcomeBg = welcomeBgAsset;
 </script>
 <template>
   <v-container fluid class="fill-height pa-0">

@@ -1,5 +1,5 @@
 <template>
-  <v-list v-model:selected="selected" color="primary">
+  <v-list v-model:selected="selected" color="primary" bg-color="transparent">
     <v-list-item
       v-for="company in companies"
       :key="company.ticker"
@@ -34,6 +34,9 @@ const emit = defineEmits(['company-selected']);
 onMounted(async () => {
   try {
     companies.value = await getCompanies();
+    if (companies.value.length > 0 && companies.value[0]) {
+      selected.value = [companies.value[0].ticker];
+    }
   } catch (error) {
     console.error('Error fetching companies:', error);
   }

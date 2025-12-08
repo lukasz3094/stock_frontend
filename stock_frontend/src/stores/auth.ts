@@ -7,7 +7,13 @@ const API_URL = import.meta.env.VITE_API_URL;
 interface AuthState {
   token: string | null;
   error: string | null;
-  router: Router | null;
+  router: any | null; // Changed to any to resolve type incompatibility
+}
+
+interface ErrorDetail {
+  msg: string;
+  type: string;
+  loc: string[];
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -34,7 +40,7 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         if (axios.isAxiosError(error)) {
           if (Array.isArray(error.response?.data?.detail)) {
-            this.error = error.response.data.detail.map((err: any) => err.msg).join('; ');
+            this.error = (error.response.data.detail as ErrorDetail[]).map((err) => err.msg).join('; ');
           } else {
             this.error = error.response?.data?.detail || 'An error occurred during registration.';
           }
@@ -67,7 +73,7 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         if (axios.isAxiosError(error)) {
           if (Array.isArray(error.response?.data?.detail)) {
-            this.error = error.response.data.detail.map((err: any) => err.msg).join('; ');
+            this.error = (error.response.data.detail as ErrorDetail[]).map((err) => err.msg).join('; ');
           } else {
             this.error = error.response?.data?.detail || 'An error occurred during login.';
           }

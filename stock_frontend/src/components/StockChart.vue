@@ -6,7 +6,7 @@
       :series="series"
       :options="chartOptions"
     />
-    <InterpretationView v-if="ticker" :symbol="ticker" />
+    <InterpretationView v-if="ticker" :symbol="ticker" ref="interpretationView" />
   </div>
 </template>
 
@@ -15,83 +15,25 @@ import { ref, watch, computed } from 'vue';
 import LightweightChart from './LightweightChart.vue';
 import InterpretationView from './InterpretationView.vue';
 import { getCompanyHistory, getPredictions } from '@/services/company_api';
+import { chartOptions } from './chartOptions';
+import { createChartSeries } from '@/lib/chartSeries';
+import type { LightweightChartExposed, HistoryDataItem, PredictionDataItem, ChartSeries } from '@/types/chart';
 
 const props = defineProps<{
   ticker: string | null;
 }>();
 
-const chartComponent = ref(null);
-const historyData = ref([]);
-const predictionData = ref([]);
+const chartComponent = ref<LightweightChartExposed | null>(null);
+const interpretationView = ref<InstanceType<typeof InterpretationView> | null>(null);
+const historyData = ref<HistoryDataItem[]>([]);
+const predictionData = ref<PredictionDataItem[]>([]);
 
-const chartOptions = {
-  layout: {
-    background: { color: '#232f3e' },
-    textColor: '#D1D4DC',
-  },
-  grid: {
-    vertLines: { color: '#2B2B43' },
-    horzLines: { color: '#2B2B43' },
-  },
-  timeScale: {
-    borderColor: '#cccccc',
-  },
-  autoSize: true,
-  watermark: {
-    visible: false,
-  },
-};
-
-const series = computed(() => {
-  if (historyData.value.length === 0) return [];
-  
-  const ohlcData = historyData.value.map((item, index) => {
-    const open = index > 0 ? historyData.value[index - 1].close : item.close;
-    const close = item.close;
-    const high = Math.max(open, close);
-    const low = Math.min(open, close);
-    return { time: item.date, open, high, low, close };
-  });
-
-  const series = [{
-      type: 'candlestick',
-      data: ohlcData,
-      options: {
-        upColor: '#4caf50',
-        downColor: '#f44336',
-        borderVisible: false,
-        wickUpColor: '#4caf50',
-        wickDownColor: '#f44336',
-      },
-    }];
-
-  if (predictionData.value.length > 0) {
-    const lastHistoryPoint = historyData.value[historyData.value.length - 1];
-    const predictionOhlcData = predictionData.value.map((item, index) => {
-      const open = index > 0 ? predictionData.value[index - 1].predicted_value : lastHistoryPoint.close;
-      const close = item.predicted_value;
-      const high = Math.max(open, close);
-      const low = Math.min(open, close);
-      return { time: item.target_date, open, high, low, close };
-    });
-
-    series.push({
-      type: 'candlestick',
-      data: predictionOhlcData,
-      options: {
-        upColor: '#03a9f4',
-        downColor: '#03a9f4',
-        wickUpColor: '#03a9f4',
-        wickDownColor: '#03a9f4',
-        borderVisible: false,
-      },
-    });
-  }
-
-  return series;
-});
+const series = computed<ChartSeries[]>(() => createChartSeries(historyData.value, predictionData.value));
 
 watch(() => props.ticker, async (newTicker) => {
+  if (interpretationView.value) {
+    interpretationView.value.resetInterpretation();
+  }
   if (newTicker) {
     try {
       historyData.value = await getCompanyHistory(newTicker);
@@ -99,15 +41,18 @@ watch(() => props.ticker, async (newTicker) => {
       predictionData.value = predictions.arima_forecast;
 
       if (chartComponent.value && predictionData.value.length > 0) {
-        const to = predictionData.value[predictionData.value.length - 1].target_date;
-        const from = new Date(new Date(to).getTime());
-        from.setDate(from.getDate() - 90);
-        chartComponent.value.setVisibleRange({ from: from.toISOString().split('T')[0], to });
+        const lastPrediction = predictionData.value[predictionData.value.length - 1];
+        if (lastPrediction && lastPrediction.target_date && chartComponent.value) {
+          const to = lastPrediction.target_date;
+          const from = new Date(new Date(to).getTime());
+          from.setDate(from.getDate() - 90);
+          const fromDate = from.toISOString().split('T')[0] ?? '';
+          chartComponent.value.setVisibleRange({ from: fromDate, to });
+        }
       }
-
     } catch (error) {
       console.error('Error fetching chart data:', error);
     }
   }
-});
+}, { immediate: true });
 </script>

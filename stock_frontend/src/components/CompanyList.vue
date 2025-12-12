@@ -10,7 +10,7 @@
         {{ formatPrice(company.current_price) }}
         <v-icon>{{ priceChangeIcon(company.price_change) }}</v-icon>
         <span v-if="company.price_change !== null && company.price_change !== 0">
-          ({{ company.price_change.toFixed(2) }}$)
+          ({{ company.price_change.toFixed(2) }})
         </span>
       </v-list-item-subtitle>    </v-list-item>
   </v-list>
@@ -44,7 +44,10 @@ onMounted(async () => {
 
 watch(selected, (newValue) => {
   if (newValue.length > 0) {
-    emit('company-selected', newValue[0]);
+    const selectedCompany = companies.value.find(c => c.ticker === newValue[0]);
+    if (selectedCompany) {
+      emit('company-selected', { ticker: selectedCompany.ticker, name: selectedCompany.name });
+    }
   }
 });
 

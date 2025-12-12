@@ -23,8 +23,8 @@ const logout = () => {
   <v-app>
     <v-app-bar v-if="showAppBar" app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-img :src="logo" max-height="50" max-width="50" contain></v-img>
-      <v-toolbar-title>Apex Predictions</v-toolbar-title>
+      <v-img :src="logo" max-height="40" max-width="40" contain class="ml-4"></v-img>
+      <v-toolbar-title class="ml-2">Stock Predictions</v-toolbar-title>
     </v-app-bar>
 
     <v-navigation-drawer v-if="showAppBar" v-model="drawer" app>

@@ -28,6 +28,8 @@ const chartContainer: Ref<HTMLElement | null> = ref(null);
 let chart: IChartApi | null = null;
 const seriesRefs: ISeriesApi<SeriesType>[] = [];
 
+let resizeObserver: ResizeObserver | null = null;
+
 onMounted(() => {
   if (!chartContainer.value) {
     console.error('Chart container not found');
@@ -55,6 +57,13 @@ onMounted(() => {
   });
 
   chart?.timeScale().fitContent();
+
+  resizeObserver = new ResizeObserver(entries => {
+    const { width, height } = entries[0].contentRect;
+    chart?.applyOptions({ width, height });
+  });
+
+  resizeObserver.observe(chartContainer.value);
 });
 
 watch(
@@ -95,6 +104,9 @@ watch(
 );
 
 onUnmounted(() => {
+  if (resizeObserver) {
+    resizeObserver.disconnect();
+  }
   if (chart) {
     chart.remove();
     chart = null;
@@ -115,6 +127,6 @@ defineExpose({
 <style scoped>
 .chart-container {
   width: 100%;
-  height: 500px;
+  flex-grow: 1;
 }
 </style>

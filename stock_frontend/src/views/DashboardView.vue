@@ -9,14 +9,16 @@
           </v-card>
         </v-col>
         <v-col cols="12" md="9">
-          <v-card class="glowing-card fill-height d-flex align-center justify-center">
-            <div v-if="!selectedTicker" class="text-center">
-              <v-icon size="64" class="mb-4">mdi-chart-line</v-icon>
-              <h2 class="text-h5">Wybierz spółkę, aby zobaczyć wykres</h2>
-            </div>
-            <StockChart v-else :ticker="selectedTicker" />
-          </v-card>
-        </v-col>
+                      <v-card class="glowing-card fill-height d-flex align-center justify-center">
+                      <div v-if="!selectedTicker" class="text-center">
+                        <v-icon size="64" class="mb-4">mdi-chart-line</v-icon>
+                        <h2 class="text-h5">Wybierz spółkę, aby zobaczyć wykres</h2>
+                      </div>
+                      <div v-else class="d-flex flex-column fill-height" style="width: 100%;">
+                          <h2 class="text-h5 text-center my-4 company-name-display">{{ selectedCompanyName }} ({{ selectedTicker }})</h2>
+                          <StockChart :ticker="selectedTicker" :companyName="selectedCompanyName" />
+                      </div>
+                    </v-card>        </v-col>
       </v-row>
     </v-container>
   </div>
@@ -28,10 +30,13 @@ import CompanyList from '@/components/CompanyList.vue';
 import StockChart from '@/components/StockChart.vue';
 
 const selectedTicker = ref<string | null>(null);
+const selectedCompanyName = ref<string | null>(null);
 
-const onCompanySelected = (ticker: string) => {
+const onCompanySelected = ({ ticker, name }: { ticker: string, name: string }) => {
   selectedTicker.value = ticker;
+  selectedCompanyName.value = name;
 };
+
 </script>
 
 <style scoped>
@@ -45,5 +50,10 @@ const onCompanySelected = (ticker: string) => {
   box-shadow: 0 0 20px 5px rgba(0, 200, 255, 0.2);
   border-radius: 16px !important;
   border: 1px solid rgba(0, 200, 255, 0.3);
+  width: 100%;
+}
+
+.company-name-display {
+  color: #64B5F6; /* Cool blue color */
 }
 </style>

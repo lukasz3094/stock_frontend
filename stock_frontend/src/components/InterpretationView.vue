@@ -1,11 +1,11 @@
 <template>
   <div>
-    <v-btn @click="getInterpretation" :loading="loading" color="primary" class="mt-4">
+    <v-btn @click="getInterpretation" :loading="loading" v-if="!interpretation && !loading"
+           color="primary" class="mt-4">
       Get Interpretation
     </v-btn>
     <v-progress-circular v-if="loading" indeterminate color="primary" class="d-flex mx-auto mt-4"></v-progress-circular>
     <div v-if="interpretation" v-html="interpretation" class="interpretation-text"></div>
-    <div v-else-if="!loading" class="placeholder-text mt-4">Click "Get Interpretation" to see the analysis.</div>
   </div>
 </template>
 
@@ -30,6 +30,7 @@ const getInterpretation = async () => {
 
   loading.value = true;
   interpretation.value = '';
+  let fullInterpretation = '';
 
   if (abortController.value) {
     abortController.value.abort();
@@ -54,10 +55,12 @@ const getInterpretation = async () => {
         const { done, value } = await reader.read();
         if (done) {
           loading.value = false;
+          const firstSentence = fullInterpretation.split('.')[0] + '.';
+          interpretation.value = marked(firstSentence);
           return;
         }
         const chunk = decoder.decode(value, { stream: true });
-        interpretation.value += marked(chunk);
+        fullInterpretation += chunk;
         read();
       };
       read();
@@ -90,5 +93,10 @@ defineExpose({
   background-color: #1E1E1E;
   border-radius: 4px;
   color: #D1D4DC;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 </style>

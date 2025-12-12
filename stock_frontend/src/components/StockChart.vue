@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="stock-chart-container fill-height">
     <LightweightChart
       v-if="series.length > 0"
       ref="chartComponent"
@@ -21,6 +21,7 @@ import type { LightweightChartExposed, HistoryDataItem, PredictionDataItem, Char
 
 const props = defineProps<{
   ticker: string | null;
+  companyName: string | null;
 }>();
 
 const chartComponent = ref<LightweightChartExposed | null>(null);
@@ -56,3 +57,13 @@ watch(() => props.ticker, async (newTicker) => {
   }
 }, { immediate: true });
 </script>
+
+<style scoped>
+.stock-chart-container {
+  width: 100%;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+}
+</style>

@@ -8,26 +8,29 @@
             <CompanyList @company-selected="onCompanySelected" />
           </v-card>
         </v-col>
-        <v-col cols="12" md="9">
-                      <v-card class="glowing-card fill-height d-flex align-center justify-center">
-                      <div v-if="!selectedTicker" class="text-center">
-                        <v-icon size="64" class="mb-4">mdi-chart-line</v-icon>
-                        <h2 class="text-h5">Wybierz spółkę, aby zobaczyć wykres</h2>
-                      </div>
-                      <div v-else class="d-flex flex-column fill-height" style="width: 100%;">
-                          <h2 class="text-h5 text-center my-4 company-name-display">{{ selectedCompanyName }} ({{ selectedTicker }})</h2>
-                          <StockChart :ticker="selectedTicker" :companyName="selectedCompanyName" />
-                      </div>
-                    </v-card>        </v-col>
-      </v-row>
-    </v-container>
-  </div>
-</template>
-
-<script setup lang="ts">
-import { ref } from 'vue';
-import CompanyList from '@/components/CompanyList.vue';
-import StockChart from '@/components/StockChart.vue';
+        <v-col cols="12" md="9" class="fill-height">
+                                <v-card class="glowing-card d-flex align-center justify-center">
+                                            <div v-if="!selectedTicker" class="text-center">
+                                              <v-icon size="64" class="mb-4">mdi-chart-line</v-icon>
+                                              <h2 class="text-h5">Wybierz spółkę, aby zobaczyć wykres</h2>
+                                            </div>
+                                            <div v-else class="d-flex flex-column" style="width: 100%; height: 100%;">
+                                                <h2 class="text-h5 text-center my-4 company-name-display">{{ selectedCompanyName }} ({{ selectedTicker }})</h2>
+                                                <StockChart :ticker="selectedTicker" />
+                                                <InterpretationView :symbol="selectedTicker" class="mt-4" />
+                                            </div>
+                                          </v-card>
+                              </v-col>
+                            </v-row>
+                          </v-container>
+                        </div>
+                      </template>
+                      
+                      <script setup lang="ts">
+                      import { ref } from 'vue';
+                      import CompanyList from '@/components/CompanyList.vue';
+                      import StockChart from '@/components/StockChart.vue';
+                      import InterpretationView from '@/components/InterpretationView.vue';
 
 const selectedTicker = ref<string | null>(null);
 const selectedCompanyName = ref<string | null>(null);

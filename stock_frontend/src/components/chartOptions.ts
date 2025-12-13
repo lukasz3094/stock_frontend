@@ -1,7 +1,7 @@
 import * as LightweightCharts from 'lightweight-charts';
 
 export const chartOptions: LightweightCharts.ChartOptions = {
-  autoSize: true,
+  autoSize: false,
   layout: {
     background: { type: LightweightCharts.ColorType.Solid, color: '#1E1E1E' },
     textColor: '#D1D4DC',

@@ -1,3 +1,4 @@
+import type { DashboardData } from '@/types/chart';
 import apiClient from './api';
 
 export const getCompanies = async () => {
@@ -10,7 +11,7 @@ export const getCompanyHistory = async (ticker: string) => {
   return response.data;
 };
 
-export const getPredictions = async (ticker: string) => {
+export const getPredictions = async (ticker: string): Promise<DashboardData> => {
   const response = await apiClient.get(`/predictions/${ticker}`);
   return response.data;
 };

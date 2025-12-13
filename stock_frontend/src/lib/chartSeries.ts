@@ -1,4 +1,5 @@
-import type { ChartSeries, HistoryDataItem, PredictionDataItem, SeriesData } from '@/types/chart';
+import type { SeriesOptionsMap, SeriesType } from 'lightweight-charts';
+import type { ChartSeries, HistoryDataItem, SeriesData, ArimaPredictionOut, GarchPredictionOut, LstmPredictionOut } from '@/types/chart';
 
 function createCandlestickData(items: HistoryDataItem[]): SeriesData[] {
   if (!items || items.length === 0) {
@@ -18,7 +19,7 @@ function createCandlestickData(items: HistoryDataItem[]): SeriesData[] {
   }).filter((dataPoint): dataPoint is SeriesData => !!dataPoint && dataPoint.time !== undefined);
 }
 
-function createPredictionLineData(items: PredictionDataItem[]): SeriesData[] {
+function createPredictionLineData(items: Array<ArimaPredictionOut | GarchPredictionOut | LstmPredictionOut>): SeriesData[] {
   if (!items || items.length === 0) {
     return [];
   }
@@ -27,38 +28,44 @@ function createPredictionLineData(items: PredictionDataItem[]): SeriesData[] {
       return null;
     }
     const time = item.target_date;
-    const value = item.predicted_value ?? 0;
+    const value = (item as ArimaPredictionOut).predicted_value ?? (item as LstmPredictionOut).predicted_value ?? (item as GarchPredictionOut).predicted_volatility ?? 0;
     return { time, value } as SeriesData;
   }).filter((dataPoint): dataPoint is SeriesData => !!dataPoint && dataPoint.time !== undefined && dataPoint.value !== undefined);
 }
 
-export function createChartSeries(historyData: HistoryDataItem[], predictionData: PredictionDataItem[]): ChartSeries[] {
-  const series: ChartSeries[] = [];
+export function createChartSeries(
+  type: 'candlestick' | 'line',
+  data: HistoryDataItem[] | ArimaPredictionOut[] | GarchPredictionOut[] | LstmPredictionOut[],
+  options?: SeriesOptionsMap[SeriesType],
+): ChartSeries {
+  let formattedData: SeriesData[] = [];
 
-  if (historyData.length > 0) {
-    series.push({
-      type: 'candlestick' as const,
-      data: createCandlestickData(historyData),
-      options: {
+  if (type === 'candlestick') {
+    formattedData = createCandlestickData(data as HistoryDataItem[]);
+    return {
+      type,
+      data: formattedData,
+      options: options || {
         upColor: '#4caf50',
         downColor: '#ef5350',
         borderDownColor: '#ef5350',
         borderUpColor: '#4caf50',
         wickDownColor: '#ef5350',
         wickUpColor: '#4caf50',
-      } as any,
-    });
+      },
+    };
+  } else if (type === 'line') {
+    formattedData = createPredictionLineData(data as (ArimaPredictionOut | GarchPredictionOut | LstmPredictionOut)[]);
+    return {
+      type,
+      data: formattedData,
+      options: options || {
+        color: '#03a9f4', // Default line color
+        lineWidth: 2,
+        crosshairMarkerVisible: true,
+        lastValueVisible: true,
+      },
+    };
   }
-
-  if (predictionData.length > 0) {
-    series.push({
-      type: 'line' as const,
-      data: createPredictionLineData(predictionData),
-      options: {
-        color: '#03a9f4',
-      } as any,
-    });
-  }
-
-  return series;
+  throw new Error(`Unsupported chart series type: ${type}`);
 }

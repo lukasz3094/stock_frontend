@@ -14,6 +14,29 @@ export interface PredictionDataItem {
   predicted_value: number;
 }
 
+export interface ArimaPredictionOut {
+  target_date: string;
+  predicted_value: number;
+}
+
+export interface GarchPredictionOut {
+  target_date: string;
+  predicted_volatility: number;
+}
+
+export interface LstmPredictionOut {
+  target_date: string;
+  predicted_value: number;
+}
+
+export interface DashboardData {
+  ticker: string;
+  last_update: string;
+  arima_forecast: ArimaPredictionOut[];
+  garch_forecast: GarchPredictionOut[];
+  lstm_forecast: LstmPredictionOut[];
+}
+
 export interface SeriesData {
   time: string;
   open?: number;

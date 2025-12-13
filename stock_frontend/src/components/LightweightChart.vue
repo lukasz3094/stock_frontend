@@ -35,7 +35,13 @@ onMounted(() => {
     console.error('Chart container not found');
     return;
   }
-  chart = createChart(chartContainer.value, props.options) as IChartApi;
+
+  const { offsetWidth, offsetHeight } = chartContainer.value;
+  chart = createChart(chartContainer.value, {
+    ...props.options,
+    width: offsetWidth,
+    height: offsetHeight,
+  }) as IChartApi;
 
   if (!chart) {
     throw new Error('Failed to create chart');
@@ -128,5 +134,6 @@ defineExpose({
 .chart-container {
   width: 100%;
   flex-grow: 1;
+  min-height: 300px; /* Ensure chart has a minimum height */
 }
 </style>

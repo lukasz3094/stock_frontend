@@ -89,15 +89,11 @@ defineExpose({
 
 <style scoped>
 .interpretation-text {
-  margin-top: 16px;
-  padding: 12px;
+  margin-top: 0;
+  padding: 4px 12px 12px 12px;
   background-color: #1E1E1E;
   border-radius: 4px;
   color: #D1D4DC;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  word-wrap: break-word;
 }
 </style>

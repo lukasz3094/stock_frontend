@@ -136,6 +136,6 @@ defineExpose({
 .chart-container {
   width: 100%;
   flex-grow: 1;
-  min-height: 300px; /* Ensure chart has a minimum height */
+  min-height: 300px;
 }
 </style>

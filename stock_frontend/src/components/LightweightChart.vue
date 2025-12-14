@@ -65,8 +65,10 @@ onMounted(() => {
   chart?.timeScale().fitContent();
 
   resizeObserver = new ResizeObserver(entries => {
-    const { width, height } = entries[0].contentRect;
-    chart?.applyOptions({ width, height });
+    if (entries[0]) {
+      const { width, height } = entries[0].contentRect;
+      chart?.applyOptions({ width, height });
+    }
   });
 
   resizeObserver.observe(chartContainer.value);

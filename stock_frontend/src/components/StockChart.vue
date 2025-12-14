@@ -1,35 +1,28 @@
 <script setup lang="ts">
-import { ref, watch, computed } from 'vue';
+import { ref, watch } from 'vue';
 import { getCompanyHistory, getPredictions } from '@/services/company_api';
 import LightweightChart from './LightweightChart.vue';
+import InterpretationView from './InterpretationView.vue';
 import { createChartSeries } from '@/lib/chartSeries';
-import type { ChartSeries, HistoryDataItem, DashboardData, PredictionDataItem } from '@/types/chart';
-import { chartOptions as defaultChartOptions } from './chartOptions'; // Import default options
+import type { ChartSeries, HistoryDataItem, DashboardData, PredictionDataItem, LightweightChartExposed } from '@/types/chart';
+import { chartOptions as defaultChartOptions } from './chartOptions';
+import { LineStyle, PriceLineSource } from 'lightweight-charts';
 
 const props = defineProps<{
   ticker: string;
+  selectedForecasts: string[];
+  forecastOptions: string[];
+  toggleForecast: (forecast: string) => void;
 }>();
 
 const historyData = ref<HistoryDataItem[]>([]);
 const allPredictions = ref<DashboardData | null>(null);
 const chartSeries = ref<ChartSeries[]>([]);
-const chartOptions = ref(defaultChartOptions); // Use imported default options
-
-const selectedForecasts = ref(['LSTM']); // Default to LSTM
-const forecastOptions = ['ARIMA', 'LSTM']; // GARCH removed
-
-const toggleForecast = (forecast: string) => {
-  const index = selectedForecasts.value.indexOf(forecast);
-  if (index > -1) {
-    // If it's already selected and it's not the last one, deselect it
-    if (selectedForecasts.value.length > 1) {
-      selectedForecasts.value.splice(index, 1);
-    }
-  } else {
-    // If not selected, select it
-    selectedForecasts.value.push(forecast);
-  }
-};
+const chartOptions = ref({
+  ...defaultChartOptions
+});
+const chartComponent = ref<LightweightChartExposed | null>(null);
+const interpretationView = ref<InstanceType<typeof InterpretationView> | null>(null);
 
 const fetchData = async () => {
   try {
@@ -52,10 +45,33 @@ const updateChartSeries = () => {
   // Candlestick series for historical data
   series.push(
     createChartSeries(
-      'candlestick', 
+      'candlestick',
       historyData.value,
       {
-        // Default candlestick options from chartSeries.ts
+        title: 'Historical Prices',
+        upColor: '#26a69a',
+        downColor: '#ef5350',
+        borderVisible: false,
+        borderColor: '#000000',
+        borderUpColor: '#26a69a',
+        borderDownColor: '#ef5350',
+        wickVisible: true,
+        wickUpColor: '#26a69a',
+        wickDownColor: '#ef5350',
+        wickColor: '#000000',
+        priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
+        lastValueVisible: true,
+        crosshairMarkerVisible: true,
+        visible: true,
+        priceLineVisible: false,
+        priceLineSource: PriceLineSource.LastBar,
+        priceLineWidth: 1,
+        priceLineColor: '',
+        priceLineStyle: LineStyle.Solid,
+        baseLineVisible: false,
+        baseLineColor: '',
+        baseLineWidth: 1,
+        baseLineStyle: LineStyle.Solid
       }
     ),
   );
@@ -66,7 +82,7 @@ const updateChartSeries = () => {
     : null;
 
   // Prediction series based on selectedForecasts
-  selectedForecasts.value.forEach(forecastType => {
+  props.selectedForecasts.forEach(forecastType => {
     let predictionData;
     let label = '';
     let color = '';
@@ -86,7 +102,7 @@ const updateChartSeries = () => {
     }
 
     if (predictionData && predictionData.length > 0) {
-        let dataToChart = [...predictionData];
+        const dataToChart = [...predictionData];
         if (lastHistoryPredictionPoint) {
             // Ensure the last history point is included for visual continuity
             dataToChart.unshift(lastHistoryPredictionPoint);
@@ -102,6 +118,17 @@ const updateChartSeries = () => {
             title: label,
             crosshairMarkerVisible: true,
             lastValueVisible: true,
+            visible: true,
+            priceLineVisible: false,
+            priceLineSource: PriceLineSource.LastBar,
+            priceLineWidth: 1,
+            priceLineColor: '',
+            priceLineStyle: LineStyle.Solid,
+            priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
+            baseLineVisible: false,
+            baseLineColor: '',
+            baseLineWidth: 1,
+            baseLineStyle: LineStyle.Solid
           }
         )
       );
@@ -114,6 +141,9 @@ const updateChartSeries = () => {
 watch(
   () => props.ticker,
   async (newTicker) => {
+    if (interpretationView.value) {
+      interpretationView.value.resetInterpretation();
+    }
     if (newTicker) {
       await fetchData();
     }
@@ -121,26 +151,42 @@ watch(
   { immediate: true },
 );
 
-watch(selectedForecasts, updateChartSeries, { deep: true });
-watch(allPredictions, updateChartSeries, { deep: true });
+watch(() => props.selectedForecasts, updateChartSeries, { deep: true });
+watch(allPredictions, (newPredictions) => {
+    updateChartSeries();
+    if (chartComponent.value && newPredictions?.arima_forecast && newPredictions.arima_forecast.length > 0) {
+        const lastPrediction = newPredictions.arima_forecast[newPredictions.arima_forecast.length - 1];
+        if (lastPrediction && lastPrediction.target_date) {
+            const to = lastPrediction.target_date;
+            const from = new Date(new Date(to).getTime());
+            from.setDate(from.getDate() - 90);
+            const fromDate = from.toISOString().split('T')[0] ?? '';
+            chartComponent.value.setVisibleRange({ from: fromDate, to });
+        }
+    }
+}, { deep: true });
 </script>
 
 <template>
-  <div class="stock-chart-container">
+  <div class="stock-chart-container fill-height">
     <div class="button-group mb-4">
       <button
-        v-for="forecast in forecastOptions"
+        v-for="forecast in props.forecastOptions"
         :key="forecast"
-        @click="toggleForecast(forecast)"
+        @click="props.toggleForecast(forecast)"
         :class="['v-btn', 'v-btn--flat', 'v-btn--density-default', 'v-btn--size-default', 'v-btn--variant-outlined',
-                  selectedForecasts.includes(forecast) ? 'forecast-button-selected' : '']"
+                  props.selectedForecasts.includes(forecast) ? 'forecast-button-selected' : '']"
       >
         {{ forecast }}
       </button>
     </div>
-    <div class="chart-wrapper">
-      <LightweightChart :series="chartSeries" :options="chartOptions" />
-    </div>
+    <LightweightChart
+      v-if="chartSeries.length > 0"
+      ref="chartComponent"
+      :series="chartSeries"
+      :options="chartOptions"
+    />
+    <InterpretationView v-if="ticker" :symbol="ticker" :selectedForecasts="props.selectedForecasts" ref="interpretationView" />
   </div>
 </template>
 
@@ -157,6 +203,7 @@ watch(allPredictions, updateChartSeries, { deep: true });
   display: flex;
   justify-content: center; /* Center the buttons */
   gap: 8px; /* Space between buttons */
+  margin-bottom: 1rem;
 }
 
 /* Mimic v-btn styling */
@@ -188,10 +235,5 @@ watch(allPredictions, updateChartSeries, { deep: true });
   border-color: #2196F3; /* Blue border when selected */
   color: #2196F3; /* Blue text when selected */
   box-shadow: 0 0 8px rgba(33, 150, 243, 0.6); /* Blue glow */
-}
-
-.chart-wrapper {
-  width: 100%;
-  height: 400px; /* Fixed height for the chart */
 }
 </style>

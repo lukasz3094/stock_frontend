@@ -1,4 +1,33 @@
 
+<script setup lang="ts">
+import { ref } from 'vue';
+import CompanyList from '@/components/CompanyList.vue';
+import StockChart from '@/components/StockChart.vue';
+
+const selectedTicker = ref<string | null>(null);
+const selectedCompanyName = ref<string | null>(null);
+
+const selectedForecasts = ref(['LSTM']); // Default to LSTM
+const forecastOptions = ['ARIMA', 'LSTM'];
+
+const toggleForecast = (forecast: string) => {
+  const index = selectedForecasts.value.indexOf(forecast);
+  if (index > -1) {
+    if (selectedForecasts.value.length > 1) {
+      selectedForecasts.value.splice(index, 1);
+    }
+  } else {
+    selectedForecasts.value.push(forecast);
+  }
+};
+
+const onCompanySelected = ({ ticker, name }: { ticker: string, name: string }) => {
+  selectedTicker.value = ticker;
+  selectedCompanyName.value = name;
+};
+
+</script>
+
 <template>
   <div class="dashboard-container">
     <v-container fluid class="fill-height">
@@ -9,15 +38,19 @@
           </v-card>
         </v-col>
         <v-col cols="12" md="9" class="fill-height">
-                                <v-card class="glowing-card d-flex align-center justify-center">
+                                <v-card class="glowing-card fill-height d-flex align-center justify-center">
                                             <div v-if="!selectedTicker" class="text-center">
                                               <v-icon size="64" class="mb-4">mdi-chart-line</v-icon>
                                               <h2 class="text-h5">Wybierz spółkę, aby zobaczyć wykres</h2>
                                             </div>
-                                            <div v-else class="d-flex flex-column" style="width: 100%; height: 100%;">
+                                            <div v-else class="d-flex flex-column fill-height" style="width: 100%;">
                                                 <h2 class="text-h5 text-center my-4 company-name-display">{{ selectedCompanyName }} ({{ selectedTicker }})</h2>
-                                                <StockChart :ticker="selectedTicker" />
-                                                <InterpretationView :symbol="selectedTicker" class="mt-4" />
+                                                <StockChart
+                                                  :ticker="selectedTicker"
+                                                  :selectedForecasts="selectedForecasts"
+                                                  :forecastOptions="forecastOptions"
+                                                  :toggleForecast="toggleForecast"
+                                                />
                                             </div>
                                           </v-card>
                               </v-col>
@@ -25,22 +58,6 @@
                           </v-container>
                         </div>
                       </template>
-                      
-                      <script setup lang="ts">
-                      import { ref } from 'vue';
-                      import CompanyList from '@/components/CompanyList.vue';
-                      import StockChart from '@/components/StockChart.vue';
-                      import InterpretationView from '@/components/InterpretationView.vue';
-
-const selectedTicker = ref<string | null>(null);
-const selectedCompanyName = ref<string | null>(null);
-
-const onCompanySelected = ({ ticker, name }: { ticker: string, name: string }) => {
-  selectedTicker.value = ticker;
-  selectedCompanyName.value = name;
-};
-
-</script>
 
 <style scoped>
 .dashboard-container {

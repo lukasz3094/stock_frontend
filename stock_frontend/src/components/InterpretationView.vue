@@ -16,6 +16,7 @@ import { marked } from 'marked';
 
 const props = defineProps<{
   symbol: string | null;
+  selectedForecasts: string[];
 }>();
 
 const loading = ref(false);
@@ -39,7 +40,7 @@ const getInterpretation = async () => {
   abortController.value = new AbortController();
 
   try {
-    const response = await fetchInterpretation(props.symbol, abortController.value);
+    const response = await fetchInterpretation(props.symbol, props.selectedForecasts, abortController.value);
 
     if (!response.ok) {
       loading.value = false;
@@ -56,7 +57,7 @@ const getInterpretation = async () => {
         if (done) {
           loading.value = false;
           const firstSentence = fullInterpretation.split('.')[0] + '.';
-          interpretation.value = marked(firstSentence);
+          interpretation.value = await marked(firstSentence);
           return;
         }
         const chunk = decoder.decode(value, { stream: true });

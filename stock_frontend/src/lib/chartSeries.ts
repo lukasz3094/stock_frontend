@@ -1,5 +1,14 @@
-import type { SeriesOptionsMap, SeriesType } from 'lightweight-charts';
-import type { ChartSeries, HistoryDataItem, SeriesData, ArimaPredictionOut, GarchPredictionOut, LstmPredictionOut } from '@/types/chart';
+import {
+  type SeriesOptionsMap,
+  type SeriesType,
+  type CandlestickSeriesOptions,
+  type LineSeriesOptions,
+  LineStyle,
+  LineType,
+  PriceLineSource,
+  LastPriceAnimationMode,
+} from 'lightweight-charts';
+import type { ChartSeries, HistoryDataItem, SeriesData, ArimaPredictionOut, LstmPredictionOut } from '@/types/chart';
 
 function createCandlestickData(items: HistoryDataItem[]): SeriesData[] {
   if (!items || items.length === 0) {
@@ -14,12 +23,12 @@ function createCandlestickData(items: HistoryDataItem[]): SeriesData[] {
     const open = index > 0 ? (items[index - 1]?.close ?? close) : close;
     const high = Math.max(open, close);
     const low = Math.min(open, close);
-    
+
     return { time, open, high, low, close } as SeriesData;
   }).filter((dataPoint): dataPoint is SeriesData => !!dataPoint && dataPoint.time !== undefined);
 }
 
-function createPredictionLineData(items: Array<ArimaPredictionOut | GarchPredictionOut | LstmPredictionOut>): SeriesData[] {
+function createPredictionLineData(items: Array<ArimaPredictionOut | LstmPredictionOut>): SeriesData[] {
   if (!items || items.length === 0) {
     return [];
   }
@@ -28,43 +37,91 @@ function createPredictionLineData(items: Array<ArimaPredictionOut | GarchPredict
       return null;
     }
     const time = item.target_date;
-    const value = (item as ArimaPredictionOut).predicted_value ?? (item as LstmPredictionOut).predicted_value ?? (item as GarchPredictionOut).predicted_volatility ?? 0;
+    const value = (item as ArimaPredictionOut).predicted_value ?? (item as LstmPredictionOut).predicted_value ?? 0;
     return { time, value } as SeriesData;
   }).filter((dataPoint): dataPoint is SeriesData => !!dataPoint && dataPoint.time !== undefined && dataPoint.value !== undefined);
 }
 
 export function createChartSeries(
   type: 'candlestick' | 'line',
-  data: HistoryDataItem[] | ArimaPredictionOut[] | GarchPredictionOut[] | LstmPredictionOut[],
+  data: HistoryDataItem[] | ArimaPredictionOut[] | LstmPredictionOut[],
   options?: SeriesOptionsMap[SeriesType],
 ): ChartSeries {
   let formattedData: SeriesData[] = [];
 
   if (type === 'candlestick') {
     formattedData = createCandlestickData(data as HistoryDataItem[]);
-    return {
-      type,
-      data: formattedData,
-      options: options || {
-        upColor: '#4caf50',
-        downColor: '#ef5350',
-        borderDownColor: '#ef5350',
-        borderUpColor: '#4caf50',
-        wickDownColor: '#ef5350',
-        wickUpColor: '#4caf50',
+    const defaultOptions: CandlestickSeriesOptions = {
+      upColor: '#4caf50',
+      downColor: '#ef5350',
+      borderDownColor: '#ef5350',
+      borderUpColor: '#4caf50',
+      wickDownColor: '#ef5350',
+      wickUpColor: '#4caf50',
+      lastValueVisible: false,
+      priceLineVisible: false,
+      wickVisible: true,
+      borderVisible: true,
+      borderColor: '#378658',
+      wickColor: '#378658',
+      title: '',
+      visible: true,
+      priceLineSource: PriceLineSource.LastBar,
+      priceLineWidth: 1,
+      priceLineColor: '',
+      priceLineStyle: LineStyle.Dotted,
+      baseLineVisible: true,
+      baseLineColor: '#B2B5BE',
+      baseLineWidth: 1,
+      baseLineStyle: LineStyle.Solid,
+      priceFormat: {
+        type: 'price',
+        precision: 2,
+        minMove: 0.01,
       },
     };
-  } else if (type === 'line') {
-    formattedData = createPredictionLineData(data as (ArimaPredictionOut | GarchPredictionOut | LstmPredictionOut)[]);
     return {
       type,
       data: formattedData,
-      options: options || {
-        color: '#03a9f4', // Default line color
-        lineWidth: 2,
-        crosshairMarkerVisible: true,
-        lastValueVisible: true,
+      options: { ...defaultOptions, ...options },
+    };
+  } else if (type === 'line') {
+    formattedData = createPredictionLineData(data as (ArimaPredictionOut | LstmPredictionOut)[]);
+    const defaultOptions: LineSeriesOptions = {
+      color: '#03a9f4',
+      lineWidth: 2,
+      lineStyle: LineStyle.Solid,
+      crosshairMarkerVisible: true,
+      lastValueVisible: true,
+      lineType: LineType.Simple,
+      lineVisible: true,
+      pointMarkersVisible: false,
+      crosshairMarkerRadius: 4,
+      crosshairMarkerBorderColor: '',
+      crosshairMarkerBackgroundColor: '',
+      crosshairMarkerBorderWidth: 0,
+      lastPriceAnimation: LastPriceAnimationMode.Disabled,
+      title: '',
+      visible: true,
+      priceLineVisible: false,
+      priceLineSource: PriceLineSource.LastBar,
+      priceLineWidth: 1,
+      priceLineColor: '',
+      priceLineStyle: LineStyle.Dotted,
+      baseLineVisible: true,
+      baseLineColor: '#B2B5BE',
+      baseLineWidth: 1,
+      baseLineStyle: LineStyle.Solid,
+      priceFormat: {
+        type: 'price',
+        precision: 2,
+        minMove: 0.01,
       },
+    };
+    return {
+      type,
+      data: formattedData,
+      options: { ...defaultOptions, ...options },
     };
   }
   throw new Error(`Unsupported chart series type: ${type}`);

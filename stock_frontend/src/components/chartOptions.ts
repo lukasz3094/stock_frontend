@@ -1,28 +1,29 @@
 import { ColorType, CrosshairMode, LineStyle, TrackingModeExitMode, PriceScaleMode } from 'lightweight-charts';
 import type { DeepPartial, TimeChartOptions } from 'lightweight-charts';
+import { chartColors } from '@/utils/theme';
 
-export const chartOptions: DeepPartial<TimeChartOptions> = {
+export const getChartOptions = (): DeepPartial<TimeChartOptions> => ({
   layout: {
-    background: { type: ColorType.Solid, color: '#1E1E1E' },
-    textColor: '#D1D4DC',
+    background: { type: ColorType.Solid, color: chartColors.background },
+    textColor: chartColors.text,
     fontSize: 11,
     fontFamily: 'Roboto, sans-serif',
     attributionLogo: false,
   },
   grid: {
     vertLines: {
-      color: '#2A2A2A',
+      color: chartColors.grid,
       style: LineStyle.Solid,
       visible: true,
     },
     horzLines: {
-      color: '#2A2A2A',
+      color: chartColors.grid,
       style: LineStyle.Solid,
       visible: true,
     },
   },
   timeScale: {
-    borderColor: '#cccccc',
+    borderColor: chartColors.scaleBorder,
     timeVisible: true,
     rightOffset: 12,
     barSpacing: 10,
@@ -39,23 +40,23 @@ export const chartOptions: DeepPartial<TimeChartOptions> = {
     mode: CrosshairMode.Normal,
     vertLine: {
       width: 2,
-      color: 'rgba(224, 227, 235, 0.1)',
+      color: chartColors.crosshair,
       style: LineStyle.Solid,
       labelVisible: false,
       visible: true,
-      labelBackgroundColor: '#1E1E1E',
+      labelBackgroundColor: chartColors.background,
     },
     horzLine: {
       labelVisible: true,
       width: 2,
-      color: '#9B7DFF',
+      color: chartColors.forecastOther, // Used as accent/marker
       style: LineStyle.Solid,
-      labelBackgroundColor: '#1E1E1E',
+      labelBackgroundColor: chartColors.background,
       visible: true,
     },
   },
   rightPriceScale: {
-    borderColor: '#cccccc',
+    borderColor: chartColors.scaleBorder,
     scaleMargins: {
       top: 0.3,
       bottom: 0.25,
@@ -91,4 +92,4 @@ export const chartOptions: DeepPartial<TimeChartOptions> = {
   trackingMode: {
     exitMode: TrackingModeExitMode.OnTouchEnd,
   },
-};
+});

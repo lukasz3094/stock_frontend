@@ -9,6 +9,7 @@ import {
   LastPriceAnimationMode,
 } from 'lightweight-charts';
 import type { ChartSeries, HistoryDataItem, SeriesData, ArimaPredictionOut, LstmPredictionOut } from '@/types/chart';
+import { chartColors } from '@/utils/theme';
 
 function createCandlestickData(items: HistoryDataItem[]): SeriesData[] {
   if (!items || items.length === 0) {
@@ -52,18 +53,18 @@ export function createChartSeries(
   if (type === 'candlestick') {
     formattedData = createCandlestickData(data as HistoryDataItem[]);
     const defaultOptions: CandlestickSeriesOptions = {
-      upColor: '#4caf50',
-      downColor: '#ef5350',
-      borderDownColor: '#ef5350',
-      borderUpColor: '#4caf50',
-      wickDownColor: '#ef5350',
-      wickUpColor: '#4caf50',
+      upColor: chartColors.up,
+      downColor: chartColors.down,
+      borderDownColor: chartColors.borderDown,
+      borderUpColor: chartColors.borderUp,
+      wickDownColor: chartColors.wickDown,
+      wickUpColor: chartColors.wickUp,
       lastValueVisible: false,
       priceLineVisible: false,
       wickVisible: true,
       borderVisible: true,
-      borderColor: '#378658',
-      wickColor: '#378658',
+      borderColor: chartColors.border,
+      wickColor: chartColors.wick,
       title: '',
       visible: true,
       priceLineSource: PriceLineSource.LastBar,
@@ -71,7 +72,7 @@ export function createChartSeries(
       priceLineColor: '',
       priceLineStyle: LineStyle.Dotted,
       baseLineVisible: true,
-      baseLineColor: '#B2B5BE',
+      baseLineColor: chartColors.grid,
       baseLineWidth: 1,
       baseLineStyle: LineStyle.Solid,
       priceFormat: {
@@ -88,7 +89,7 @@ export function createChartSeries(
   } else if (type === 'line') {
     formattedData = createPredictionLineData(data as (ArimaPredictionOut | LstmPredictionOut)[]);
     const defaultOptions: LineSeriesOptions = {
-      color: '#03a9f4',
+      color: chartColors.forecastLstm, // Default
       lineWidth: 2,
       lineStyle: LineStyle.Solid,
       crosshairMarkerVisible: true,
@@ -109,7 +110,7 @@ export function createChartSeries(
       priceLineColor: '',
       priceLineStyle: LineStyle.Dotted,
       baseLineVisible: true,
-      baseLineColor: '#B2B5BE',
+      baseLineColor: chartColors.grid,
       baseLineWidth: 1,
       baseLineStyle: LineStyle.Solid,
       priceFormat: {

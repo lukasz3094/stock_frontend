@@ -1,8 +1,8 @@
 import type { DashboardData } from '@/types/chart';
 import apiClient from './api';
 
-export const getCompanies = async () => {
-  const response = await apiClient.get('/companies');
+export const getCompanies = async (timeframe: string) => {
+  const response = await apiClient.get(`/companies/${timeframe}`);
   return response.data;
 };
 

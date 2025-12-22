@@ -114,14 +114,14 @@ const handleSubmit = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(10, 10, 10, 0.25);
+  background-color: var(--color-surface-overlay-light);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
 }
 
 .glowing-card {
-  background-color: rgba(30, 30, 30, 0.6) !important;
-  box-shadow: 0 0 20px 5px rgba(0, 200, 255, 0.2);
+  background-color: var(--color-surface-transparent) !important;
+  box-shadow: var(--shadow-glow-primary);
   border-radius: 16px !important;
 }
 </style>

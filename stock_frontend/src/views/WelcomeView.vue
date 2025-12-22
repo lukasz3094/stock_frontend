@@ -38,15 +38,15 @@ const welcomeBg = welcomeBgAsset;
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.6); /* Darker overlay */
+  background-color: var(--color-surface-overlay); /* Darker overlay */
 }
 
 .glass-content {
-  background: rgba(22, 22, 22, 0.25);
+  background: var(--color-surface-overlay-light);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px); /* For Safari */
   border-radius: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid var(--color-border-white-faint);
   padding: 40px;
   position: relative;
   z-index: 1;

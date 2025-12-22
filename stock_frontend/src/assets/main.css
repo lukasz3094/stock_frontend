@@ -1,0 +1,76 @@
+:root {
+  /* Base Colors */
+  --color-background: #121212;
+  --color-surface: #1E1E1E;
+  --color-surface-transparent: rgba(30, 30, 30, 0.6);
+  --color-surface-overlay: rgba(0, 0, 0, 0.6);
+  --color-surface-overlay-light: rgba(22, 22, 22, 0.25);
+  
+  /* Brand Colors */
+  --color-primary: #00C8FF;
+  --color-secondary: #B0BEC5;
+  
+  /* Status Colors */
+  --color-error: #E53935;
+  --color-info: #2196F3;
+  --color-success: #00C853;
+  --color-warning: #FFB300;
+
+  /* Chart Colors */
+  --color-chart-up: #26a69a;
+  --color-chart-down: #ef5350;
+  --color-chart-border: #000000;
+  --color-chart-grid: #2A2A2A;
+  --color-chart-text: #D1D4DC;
+  --color-chart-crosshair: rgba(224, 227, 235, 0.1);
+  --color-chart-line-forecast-arima: #FF0000;
+  --color-chart-line-forecast-lstm: #0000FF;
+  --color-chart-line-forecast-other: #9B7DFF;
+  --color-chart-border-scale: #cccccc;
+  --color-chart-wick-black: #000000;
+
+  /* Text Colors */
+  --color-text-primary: #E0E0E0;
+  --color-text-secondary: #B0BEC5; 
+  --color-text-link: #64B5F6;
+  --color-text-muted: #9E9E9E; /* Grey */
+
+  /* Borders & Shadows */
+  --color-border-subtle: rgba(255, 255, 255, 0.2);
+  --color-border-primary-subtle: rgba(0, 200, 255, 0.3);
+  --color-border-white-faint: rgba(255, 255, 255, 0.18);
+  --shadow-glow-primary: 0 0 20px 5px rgba(0, 200, 255, 0.2);
+  --shadow-glow-active: 0 0 8px rgba(33, 150, 243, 0.6);
+}
+
+#app {
+  max-width: 1280px;
+  margin: 0 auto;
+  font-weight: normal;
+}
+
+a,
+.green {
+  text-decoration: none;
+  color: hsla(160, 100%, 37%, 1);
+  transition: 0.4s;
+}
+
+@media (hover: hover) {
+  a:hover {
+    background-color: hsla(160, 100%, 37%, 0.2);
+  }
+}
+
+/* Custom Text Classes using Variables */
+.text-stock-green {
+  color: var(--color-chart-up) !important;
+}
+
+.text-stock-red {
+  color: var(--color-chart-down) !important;
+}
+
+.text-stock-grey {
+  color: var(--color-text-muted) !important;
+}

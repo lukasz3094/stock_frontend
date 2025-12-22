@@ -91,9 +91,9 @@ defineExpose({
 .interpretation-text {
   margin-top: 0;
   padding: 4px 12px 12px 12px;
-  background-color: #1E1E1E;
+  background-color: var(--color-surface);
   border-radius: 4px;
-  color: #D1D4DC;
+  color: var(--color-chart-text);
   word-wrap: break-word;
 }
 </style>

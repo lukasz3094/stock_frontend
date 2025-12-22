@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
-import { getCompanyHistory, getPredictions } from '@/services/company_api';
+import { ref, watch, onMounted } from 'vue';
 import LightweightChart from './LightweightChart.vue';
 import InterpretationView from './InterpretationView.vue';
 import { createChartSeries } from '@/lib/chartSeries';
-import type { ChartSeries, HistoryDataItem, DashboardData, PredictionDataItem, LightweightChartExposed } from '@/types/chart';
-import { chartOptions as defaultChartOptions } from './chartOptions';
+import type { ChartSeries, PredictionDataItem, LightweightChartExposed } from '@/types/chart';
+import { getChartOptions } from './chartOptions';
 import { LineStyle, PriceLineSource } from 'lightweight-charts';
+import { chartColors } from '@/utils/theme';
+import { useCompaniesStore } from '@/stores/companies';
 
 const props = defineProps<{
   ticker: string;
@@ -15,27 +16,14 @@ const props = defineProps<{
   toggleForecast: (forecast: string) => void;
 }>();
 
-const historyData = ref<HistoryDataItem[]>([]);
-const allPredictions = ref<DashboardData | null>(null);
+const store = useCompaniesStore();
 const chartSeries = ref<ChartSeries[]>([]);
-const chartOptions = ref({
-  ...defaultChartOptions
-});
+const chartOptions = ref<any>({}); // Initialize empty, set on mount
 const chartComponent = ref<LightweightChartExposed | null>(null);
 const interpretationView = ref<InstanceType<typeof InterpretationView> | null>(null);
 
-const fetchData = async () => {
-  try {
-    historyData.value = await getCompanyHistory(props.ticker);
-    allPredictions.value = await getPredictions(props.ticker);
-    updateChartSeries();
-  } catch (error) {
-    console.error('Error fetching chart data:', error);
-  }
-};
-
 const updateChartSeries = () => {
-  if (!historyData.value || !allPredictions.value) {
+  if (!store.historyData || !store.predictions) {
     chartSeries.value = [];
     return;
   }
@@ -46,19 +34,19 @@ const updateChartSeries = () => {
   series.push(
     createChartSeries(
       'candlestick',
-      historyData.value,
+      store.historyData,
       {
         title: 'Historical Prices',
-        upColor: '#26a69a',
-        downColor: '#ef5350',
+        upColor: chartColors.up,
+        downColor: chartColors.down,
         borderVisible: false,
-        borderColor: '#000000',
-        borderUpColor: '#26a69a',
-        borderDownColor: '#ef5350',
+        borderColor: chartColors.border,
+        borderUpColor: chartColors.borderUp,
+        borderDownColor: chartColors.borderDown,
         wickVisible: true,
-        wickUpColor: '#26a69a',
-        wickDownColor: '#ef5350',
-        wickColor: '#000000',
+        wickUpColor: chartColors.wickUp,
+        wickDownColor: chartColors.wickDown,
+        wickColor: chartColors.wick,
         priceFormat: { type: 'price', precision: 2, minMove: 0.01 },
         lastValueVisible: true,
         crosshairMarkerVisible: true,
@@ -76,7 +64,7 @@ const updateChartSeries = () => {
     ),
   );
 
-  const lastHistoryItem = historyData.value[historyData.value.length - 1];
+  const lastHistoryItem = store.historyData[store.historyData.length - 1];
   const lastHistoryPredictionPoint: PredictionDataItem | null = lastHistoryItem
     ? { target_date: lastHistoryItem.date, predicted_value: lastHistoryItem.close }
     : null;
@@ -89,15 +77,14 @@ const updateChartSeries = () => {
 
     switch (forecastType) {
       case 'ARIMA':
-        predictionData = allPredictions.value?.arima_forecast;
+        predictionData = store.predictions?.arima_forecast;
         label = 'ARIMA Forecast';
-        color = '#FF0000'; // Red
+        color = chartColors.forecastArima; 
         break;
-      // GARCH case removed
       case 'LSTM':
-        predictionData = allPredictions.value?.lstm_forecast;
+        predictionData = store.predictions?.lstm_forecast;
         label = 'LSTM Forecast';
-        color = '#0000FF'; // Blue
+        color = chartColors.forecastLstm;
         break;
     }
 
@@ -138,21 +125,27 @@ const updateChartSeries = () => {
   chartSeries.value = series;
 };
 
+onMounted(() => {
+  chartOptions.value = getChartOptions();
+  updateChartSeries();
+});
+
 watch(
   () => props.ticker,
-  async (newTicker) => {
+  async () => {
     if (interpretationView.value) {
       interpretationView.value.resetInterpretation();
-    }
-    if (newTicker) {
-      await fetchData();
     }
   },
   { immediate: true },
 );
 
+watch(() => [store.historyData, store.predictions], () => {
+  updateChartSeries();
+}, { deep: true });
+
 watch(() => props.selectedForecasts, updateChartSeries, { deep: true });
-watch(allPredictions, (newPredictions) => {
+watch(() => store.predictions, (newPredictions) => {
     updateChartSeries();
     if (chartComponent.value && newPredictions?.arima_forecast && newPredictions.arima_forecast.length > 0) {
         const lastPrediction = newPredictions.arima_forecast[newPredictions.arima_forecast.length - 1];
@@ -223,17 +216,17 @@ watch(allPredictions, (newPredictions) => {
   cursor: pointer;
   background-color: transparent; /* Ensure no background fill */
   transition: all 0.2s ease-in-out;
-  border: 1px solid rgba(255, 255, 255, 0.2); /* Default subtle border */
-  color: #E0E0E0; /* Default text color */
+  border: 1px solid var(--color-border-subtle); /* Default subtle border */
+  color: var(--color-text-primary); /* Default text color */
 }
 
 .v-btn:hover {
-  border-color: #64B5F6; /* Lighter blue on hover */
+  border-color: var(--color-text-link); /* Lighter blue on hover */
 }
 
 .forecast-button-selected {
-  border-color: #2196F3; /* Blue border when selected */
-  color: #2196F3; /* Blue text when selected */
-  box-shadow: 0 0 8px rgba(33, 150, 243, 0.6); /* Blue glow */
+  border-color: var(--color-info); /* Blue border when selected */
+  color: var(--color-info); /* Blue text when selected */
+  box-shadow: var(--shadow-glow-active); /* Blue glow */
 }
 </style>

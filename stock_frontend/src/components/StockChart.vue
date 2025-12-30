@@ -18,7 +18,7 @@ const props = defineProps<{
 
 const store = useCompaniesStore();
 const chartSeries = ref<ChartSeries[]>([]);
-const chartOptions = ref<any>({}); // Initialize empty, set on mount
+const chartOptions = ref<any>({});
 const chartComponent = ref<LightweightChartExposed | null>(null);
 const interpretationView = ref<InstanceType<typeof InterpretationView> | null>(null);
 
@@ -30,7 +30,6 @@ const updateChartSeries = () => {
 
   const series: ChartSeries[] = [];
 
-  // Candlestick series for historical data
   series.push(
     createChartSeries(
       'candlestick',
@@ -51,11 +50,11 @@ const updateChartSeries = () => {
         lastValueVisible: true,
         crosshairMarkerVisible: true,
         visible: true,
-        priceLineVisible: false,
+        priceLineVisible: true,
         priceLineSource: PriceLineSource.LastBar,
         priceLineWidth: 1,
         priceLineColor: '',
-        priceLineStyle: LineStyle.Solid,
+        priceLineStyle: LineStyle.Dashed,
         baseLineVisible: false,
         baseLineColor: '',
         baseLineWidth: 1,
@@ -101,12 +100,12 @@ const updateChartSeries = () => {
           dataToChart,
           {
             color: color,
-            lineWidth: 2,
+            lineWidth: 4,
             title: label,
             crosshairMarkerVisible: true,
             lastValueVisible: true,
             visible: true,
-            priceLineVisible: false,
+            priceLineVisible: true,
             priceLineSource: PriceLineSource.LastBar,
             priceLineWidth: 1,
             priceLineColor: '',
@@ -194,14 +193,12 @@ watch(() => store.predictions, (newPredictions) => {
 
 .button-group {
   display: flex;
-  justify-content: center; /* Center the buttons */
-  gap: 8px; /* Space between buttons */
+  justify-content: center;
+  gap: 8px;
   margin-bottom: 1rem;
 }
 
-/* Mimic v-btn styling */
 .v-btn {
-  /* Inherit some base v-btn styles or define them */
   border-radius: 4px;
   text-transform: uppercase;
   font-weight: 500;
@@ -214,19 +211,19 @@ watch(() => store.predictions, (newPredictions) => {
   justify-content: center;
   user-select: none;
   cursor: pointer;
-  background-color: transparent; /* Ensure no background fill */
+  background-color: transparent;
   transition: all 0.2s ease-in-out;
-  border: 1px solid var(--color-border-subtle); /* Default subtle border */
-  color: var(--color-text-primary); /* Default text color */
+  border: 1px solid var(--color-border-subtle);
+  color: var(--color-text-primary);
 }
 
 .v-btn:hover {
-  border-color: var(--color-text-link); /* Lighter blue on hover */
+  border-color: var(--color-text-link);
 }
 
 .forecast-button-selected {
-  border-color: var(--color-info); /* Blue border when selected */
-  color: var(--color-info); /* Blue text when selected */
-  box-shadow: var(--shadow-glow-active); /* Blue glow */
+  border-color: var(--color-info);
+  color: var(--color-info);
+  box-shadow: var(--shadow-glow-active);
 }
 </style>

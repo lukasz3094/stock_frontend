@@ -1,16 +1,17 @@
 <template>
   <div class="company-list-container">
-    <div class="pa-2 d-flex justify-center">
-      <v-btn-toggle
-        :model-value="store.selectedTimeframe"
-        mandatory
-        color="primary"
-        variant="outlined"
-        density="compact"
-        @update:model-value="onTimeframeChange"
+    <div class="pa-2 d-flex justify-center flex-wrap gap-2">
+      <v-btn
+        v-for="value in store.timeFrameValues"
+        :key="value"
+        size="small"
+        outlined
+        @click="store.setTimeframe(value as Timeframe)"
+        :class="{ 'btn-active': store.selectedTimeframe === value }"
+        class="pa-2 ma-1"
       >
-        <v-btn v-for="value in store.timeFrameValues" :key="value" :value="value" size="small">{{ value }}</v-btn>
-      </v-btn-toggle>
+        {{ value }}
+      </v-btn>
     </div>
 
     <v-list
@@ -46,12 +47,6 @@ const store = useCompaniesStore();
 onMounted(() => {
   store.fetchCompanies();
 });
-
-const onTimeframeChange = (newTimeframe: string | null) => {
-  if (newTimeframe) {
-    store.setTimeframe(newTimeframe as Timeframe);
-  }
-};
 
 const onCompanySelect = (selection: (string | null)[]) => {
   if (selection.length > 0) {
@@ -93,4 +88,21 @@ const priceChangeIcon = (change: number | null) => {
   display: flex;
   flex-direction: column;
 }
+
+.btn-active {
+  color: var(--color-background);
+  background-color: var(--color-primary);
+  box-shadow: 0 0 8px var(--color-primary);
+  transition: all 0.2s ease;
+}
+
+.v-btn:hover {
+  filter: brightness(0.9);
+  transition: filter 0.2s ease;
+}
+
+.d-flex.flex-wrap.gap-2 {
+  row-gap: 8px;
+}
+
 </style>

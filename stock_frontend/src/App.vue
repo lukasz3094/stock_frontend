@@ -27,7 +27,7 @@ const logout = () => {
       <v-toolbar-title class="ml-2">Stock Predictions</v-toolbar-title>
     </v-app-bar>
 
-    <v-navigation-drawer v-if="showAppBar" v-model="drawer" app>
+    <v-navigation-drawer v-if="showAppBar" v-model="drawer" app temporary>
       <v-list>
         <v-list-item to="/dashboard">
           <v-list-item-title>Dashboard</v-list-item-title>

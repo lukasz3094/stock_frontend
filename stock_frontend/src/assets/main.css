@@ -23,9 +23,9 @@
   --color-chart-grid: #2A2A2A;
   --color-chart-text: #D1D4DC;
   --color-chart-crosshair: rgba(224, 227, 235, 0.1);
-  --color-chart-line-forecast-arima: #FF0000;
-  --color-chart-line-forecast-lstm: #0000FF;
-  --color-chart-line-forecast-other: #9B7DFF;
+  --color-chart-line-forecast-arima: #8000ff;
+  --color-chart-line-forecast-lstm: #154ac7;
+  --color-chart-line-forecast-other: #3e3e3e;
   --color-chart-border-scale: #cccccc;
   --color-chart-wick-black: #000000;
 

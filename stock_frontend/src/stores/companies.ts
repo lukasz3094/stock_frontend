@@ -2,7 +2,8 @@ import { defineStore } from 'pinia';
 import { getCompanies, getCompanyHistory, getPredictions } from '@/services/company_api';
 import type { HistoryDataItem, DashboardData } from '@/types/chart';
 
-export type Timeframe = '1D' | '5D' | '1M' | '6M' | 'YTD' | '1Y' | 'MAX';
+// export type Timeframe = '1D' | '5D' | '1M' | '6M' | 'YTD' | '1Y' | 'MAX';
+export type Timeframe = '1D' | '5D' | '1M' | '6M' | 'YTD' | 'MAX';
 
 export interface Company {
   name: string;
@@ -31,7 +32,8 @@ export const useCompaniesStore = defineStore('companies', {
     companies: [],
     selectedTicker: null,
     selectedCompanyName: null,
-    timeFrameValues: ['1D', '5D', '1M', '6M', 'YTD', '1Y', 'MAX'] as Timeframe[],
+    // timeFrameValues: ['1D', '5D', '1M', '6M', 'YTD', '1Y', 'MAX'] as Timeframe[],
+    timeFrameValues: ['1D', '5D', '1M', '6M', 'YTD', 'MAX'] as Timeframe[],
     selectedTimeframe: '1D',
     loading: false,
     error: null,

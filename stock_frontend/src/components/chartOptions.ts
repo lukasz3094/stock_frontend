@@ -27,7 +27,7 @@ export const getChartOptions = (): DeepPartial<TimeChartOptions> => ({
     timeVisible: true,
     rightOffset: 12,
     barSpacing: 10,
-    fixLeftEdge: true,
+    fixLeftEdge: false,
     lockVisibleTimeRangeOnResize: true,
     rightBarStaysOnScroll: true,
     borderVisible: false,
@@ -49,7 +49,7 @@ export const getChartOptions = (): DeepPartial<TimeChartOptions> => ({
     horzLine: {
       labelVisible: true,
       width: 2,
-      color: chartColors.forecastOther, // Used as accent/marker
+      color: chartColors.forecastOther,
       style: LineStyle.Solid,
       labelBackgroundColor: chartColors.background,
       visible: true,

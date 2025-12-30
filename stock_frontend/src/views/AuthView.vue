@@ -98,7 +98,7 @@ const handleSubmit = async () => {
               </v-form>
             </v-card-text>
             <v-card-actions class="justify-center">
-              <v-btn text @click="isLogin = !isLogin">{{ isLogin ? 'Potrzebujesz konta? Zarejestruj się' : 'Masz już konto? Zaloguj się' }}</v-btn>
+              <span @click="isLogin = !isLogin" class="cursor-pointer span-btn">{{ isLogin ? 'Potrzebujesz konta? Zarejestruj się' : 'Masz już konto? Zaloguj się' }}</span>
             </v-card-actions>
           </v-card>
         </v-col>

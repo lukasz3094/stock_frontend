@@ -44,7 +44,6 @@
 }
 
 #app {
-  max-width: 1280px;
   margin: 0 auto;
   font-weight: normal;
 }
@@ -73,4 +72,19 @@ a,
 
 .text-stock-grey {
   color: var(--color-text-muted) !important;
+}
+
+/* Button hover filter */
+.v-btn:hover {
+  filter: brightness(0.9);
+}
+
+/* Span act like text button */
+.span-btn {
+  cursor: pointer;
+}
+.span-btn:hover {
+  filter: brightness(0.9);
+  color: var(--color-primary);
+  text-decoration: underline;
 }

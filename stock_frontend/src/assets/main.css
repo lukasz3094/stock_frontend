@@ -9,6 +9,9 @@
   /* Brand Colors */
   --color-primary: #00C8FF;
   --color-secondary: #B0BEC5;
+
+  /* Accent Colors */
+  --color-primary-accent: #1d93b4;
   
   /* Status Colors */
   --color-error: #E53935;
@@ -48,13 +51,6 @@
   font-weight: normal;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-}
-
 @media (hover: hover) {
   a:hover {
     background-color: hsla(160, 100%, 37%, 0.2);
@@ -87,4 +83,19 @@ a,
   filter: brightness(0.9);
   color: var(--color-primary);
   text-decoration: underline;
+}
+
+/* Buttons */
+.btn-active {
+  color: var(--color-background) !important;
+  background-color: var(--color-primary) !important;
+  box-shadow: 0 0 4px var(--color-primary-accent) !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-not-active {
+  color: var(--color-primary) !important;
+  background-color: var(--color-surface-transparent) !important;
+  border: 1px solid var(--color-primary-accent) !important;
+  transition: all 0.2s ease !important;
 }

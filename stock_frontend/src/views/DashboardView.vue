@@ -37,10 +37,10 @@ const toggleForecast = (forecast: string) => {
               <v-icon size="64" class="mb-4">mdi-chart-line</v-icon>
               <h2 class="text-h5">Wybierz spółkę, aby zobaczyć wykres</h2>
             </div>
-            <div v-else class="d-flex flex-column fill-height" style="width: 100%;">
-                <h2 class="text-h5 text-center my-4 company-name-display">{{ companiesStore.selectedCompanyName }} ({{ companiesStore.selectedTicker }})</h2>
+            <div v-else class="d-flex flex-column fill-height" style="width: 100%;">              
                 <StockChart
                   :ticker="companiesStore.selectedTicker"
+                  :companyName="companiesStore.selectedCompanyName"
                   :selectedForecasts="selectedForecasts"
                   :forecastOptions="forecastOptions"
                   :toggleForecast="toggleForecast"
@@ -66,7 +66,4 @@ const toggleForecast = (forecast: string) => {
   width: 100%;
 }
 
-.company-name-display {
-  color: var(--color-text-link);
-}
 </style>

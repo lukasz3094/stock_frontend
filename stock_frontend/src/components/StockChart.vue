@@ -11,6 +11,7 @@ import { useCompaniesStore } from '@/stores/companies';
 
 const props = defineProps<{
   ticker: string;
+  companyName: string | null;
   selectedForecasts: string[];
   forecastOptions: string[];
   toggleForecast: (forecast: string) => void;
@@ -21,6 +22,7 @@ const chartSeries = ref<ChartSeries[]>([]);
 const chartOptions = ref<any>({});
 const chartComponent = ref<LightweightChartExposed | null>(null);
 const interpretationView = ref<InstanceType<typeof InterpretationView> | null>(null);
+
 
 const updateChartSeries = () => {
   if (!store.historyData || !store.predictions) {
@@ -161,24 +163,36 @@ watch(() => store.predictions, (newPredictions) => {
 
 <template>
   <div class="stock-chart-container fill-height">
-    <div class="button-group mb-4">
-      <button
-        v-for="forecast in props.forecastOptions"
-        :key="forecast"
-        @click="props.toggleForecast(forecast)"
-        :class="['v-btn', 'v-btn--flat', 'v-btn--density-default', 'v-btn--size-default', 'v-btn--variant-outlined',
-                  props.selectedForecasts.includes(forecast) ? 'forecast-button-selected' : '']"
-      >
-        {{ forecast }}
-      </button>
+    <div class="ma-2 d-flex ga-2 align-center">
+      <span class="font-weight-medium">Wybierz prognozy:</span>
+
+      <div class="d-flex ga-2 justify-center">
+        <v-btn
+          v-for="forecast in props.forecastOptions"
+          :key="forecast"
+          size="small"
+          @click="props.toggleForecast(forecast)"
+          :class="[props.selectedForecasts.includes(forecast) ? 'btn-active' : 'btn-not-active', 'btn-forecast']"
+        >
+          {{ forecast }}
+        </v-btn>
+      </div>
+
+      <div class="ticker-name-container">
+        <h2 class="text-h6 text-center">({{ props.ticker }}) {{ props.companyName }}</h2>
+      </div>
+
+      <InterpretationView v-if="ticker" :symbol="ticker" :selectedForecasts="props.selectedForecasts" 
+                          ref="interpretationView" class="interpretation" />
     </div>
+
     <LightweightChart
       v-if="chartSeries.length > 0"
       ref="chartComponent"
       :series="chartSeries"
       :options="chartOptions"
+      class="mt-2"
     />
-    <InterpretationView v-if="ticker" :symbol="ticker" :selectedForecasts="props.selectedForecasts" ref="interpretationView" />
   </div>
 </template>
 
@@ -191,39 +205,26 @@ watch(() => store.predictions, (newPredictions) => {
   flex-grow: 1;
 }
 
-.button-group {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 1rem;
+.interpretation {
+  position: absolute;
+  right: 8px;
 }
 
-.v-btn {
-  border-radius: 4px;
-  text-transform: uppercase;
-  font-weight: 500;
-  letter-spacing: 0.0892857143em;
-  padding: 0 16px;
-  height: 36px;
-  min-width: 64px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  user-select: none;
-  cursor: pointer;
-  background-color: transparent;
-  transition: all 0.2s ease-in-out;
-  border: 1px solid var(--color-border-subtle);
-  color: var(--color-text-primary);
+.ticker-name-container {
+  color: var(--color-primary);
+  background-color: var(--color-surface);
+  box-shadow: -2px 2px 2px var(--color-primary-accent) !important;
+  padding: 2px 8px;
+  border-radius: 0 0 8px 16px;
+  position: absolute;
+  z-index: 9;
+  top: 60px;
+  left: 10%;
+  right: 10%;
+  width: auto !important;
+  max-width: 80% !important;
+
+  filter: brightness(0.84);
 }
 
-.v-btn:hover {
-  border-color: var(--color-text-link);
-}
-
-.forecast-button-selected {
-  border-color: var(--color-info);
-  color: var(--color-info);
-  box-shadow: var(--shadow-glow-active);
-}
 </style>

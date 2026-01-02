@@ -1,16 +1,27 @@
 <template>
   <div>
-    <v-btn @click="getInterpretation" :loading="loading" v-if="!interpretation && !loading"
-           color="primary" class="mt-4">
-      Get Interpretation
-    </v-btn>
-    <v-progress-circular v-if="loading" indeterminate color="primary" class="d-flex mx-auto mt-4"></v-progress-circular>
-    <div v-if="interpretation" v-html="interpretation" class="interpretation-text"></div>
+    <div v-if="isInterpretationVisible" class="floating-interpretation-container">
+      <v-progress-circular v-if="loading" indeterminate color="primary" class="d-flex mx-auto my-4"></v-progress-circular>
+
+      <div v-if="interpretation" v-html="interpretation" class="pa-2 text-wrap text-md-body-2"></div>
+
+      <div v-if="interpretation" class="d-flex direction-horizontal align-end justify-space-between">
+        <button class="btn-refresh">
+          <v-icon small @click="getInterpretation" class="mt-2">mdi-refresh</v-icon>
+        </button>
+
+        <div class="text-end text-disabled text-sm-caption">{{ interpretationTime }}</div>
+      </div>
+    </div>
+
+    <button :class="[isInterpretationVisible ? 'btn-chat-selected' : '', 'btn-chat']" @click="switchInterpretationView">
+      <v-icon>mdi-robot</v-icon>
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { getInterpretation as fetchInterpretation } from '@/services/interpretation_api';
 import { marked } from 'marked';
 
@@ -21,6 +32,9 @@ const props = defineProps<{
 
 const loading = ref(false);
 const interpretation = ref('');
+const interpretationSymbol = ref('');
+const interpretationTime = ref('');
+const isInterpretationVisible = ref<boolean>(false);
 const abortController = ref<AbortController | null>(null);
 
 const getInterpretation = async () => {
@@ -31,6 +45,7 @@ const getInterpretation = async () => {
 
   loading.value = true;
   interpretation.value = '';
+  interpretationSymbol.value = props.symbol || '';
   let fullInterpretation = '';
 
   if (abortController.value) {
@@ -52,6 +67,8 @@ const getInterpretation = async () => {
     const decoder = new TextDecoder();
 
     if (reader) {
+      interpretationTime.value = new Date().toLocaleTimeString();
+
       const read = async () => {
         const { done, value } = await reader.read();
         if (done) {
@@ -77,23 +94,77 @@ const getInterpretation = async () => {
 const resetInterpretation = () => {
   interpretation.value = '';
   loading.value = false;
+  interpretationSymbol.value = '';
   if (abortController.value) {
     abortController.value.abort();
+  }
+};
+
+const switchInterpretationView = () => {
+  isInterpretationVisible.value = !isInterpretationVisible.value;
+
+  if (isInterpretationVisible.value && !interpretation.value) {
+    getInterpretation();
   }
 };
 
 defineExpose({
   resetInterpretation,
 });
+
+watch(() => props.symbol, () => {
+  if (isInterpretationVisible.value && props.symbol !== interpretationSymbol.value) {
+    switchInterpretationView();
+  }
+});
 </script>
 
 <style scoped>
-.interpretation-text {
-  margin-top: 0;
-  padding: 4px 12px 12px 12px;
-  background-color: var(--color-surface);
-  border-radius: 4px;
-  color: var(--color-chart-text);
-  word-wrap: break-word;
+
+.btn-chat {
+  background-color: var(--color-surface-transparent) !important;
+  color: var(--color-primary) !important;
+  box-shadow: 0 0 8px var(--color-primary-accent) !important;
+  transition: all 0.2s ease !important;
+  height: 34px !important;
+  aspect-ratio: 1 / 1 !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
 }
+
+.btn-chat-selected {
+  background-color: var(--color-primary) !important;
+  color: var(--color-background) !important;
+  box-shadow: 0 0 8px var(--color-primary-accent) !important;
+}
+
+
+.btn-chat:hover {
+  box-shadow: 0 0 12px var(--color-primary-accent) !important;
+}
+
+.btn-refresh {
+  height: 32px;
+  aspect-ratio: 1 / 1;
+  border-radius: 50% !important;
+}
+
+.btn-refresh:hover {
+  box-shadow: 0 0 12px var(--color-primary-accent) !important;
+}
+
+.floating-interpretation-container {
+  position: absolute;
+  top: 0;
+  right: 48px;
+  width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  background-color: var(--color-surface);
+  box-shadow: 0 4px 12px var(--color-primary-accent);
+  border-radius: 8px;
+  padding: 12px;
+  z-index: 10;
+}
+
 </style>

@@ -89,13 +89,6 @@ const priceChangeIcon = (change: number | null) => {
   flex-direction: column;
 }
 
-.btn-active {
-  color: var(--color-background);
-  background-color: var(--color-primary);
-  box-shadow: 0 0 8px var(--color-primary);
-  transition: all 0.2s ease;
-}
-
 .v-btn:hover {
   filter: brightness(0.9);
   transition: filter 0.2s ease;

@@ -7,6 +7,7 @@ import welcomeBgAsset from '@/assets/welcome_bg.png';
 const welcomeBg = welcomeBgAsset;
 
 const isLogin = ref(true);
+const registrationSuccess = ref(false);
 const email = ref('');
 const password = ref('');
 const confirmPassword = ref('');
@@ -27,10 +28,11 @@ const handleSubmit = async () => {
         return;
       }
       await authStore.register(email.value, password.value);
+      registrationSuccess.value = true;
     } else {
       await authStore.login(email.value, password.value);
+      router.push('/dashboard');
     }
-    router.push('/dashboard');
   } catch {
     error.value = authStore.error || 'An unknown error occurred.';
   } finally {
@@ -58,8 +60,16 @@ const handleSubmit = async () => {
         <!-- Form Column -->
         <v-col cols="12" md="6" class="d-flex align-center justify-center">
           <v-card class="glowing-card pa-4" width="100%" max-width="400px">
-            <v-card-title class="text-center text-h5 mb-4">{{ isLogin ? 'Witaj Ponownie' : 'Utwórz Konto' }}</v-card-title>
-            <v-card-text>
+            <v-card-title class="text-center text-h5 mb-4">{{ registrationSuccess ? 'Rejestracja Udana!' : (isLogin ? 'Witaj Ponownie' : 'Utwórz Konto') }}</v-card-title>
+            <v-card-text v-if="registrationSuccess" class="text-center">
+               <v-icon color="success" size="64" class="mb-4">mdi-email-check</v-icon>
+               <p class="text-body-1 mb-4">
+                 Wysłaliśmy link aktywacyjny na Twój adres email: <strong>{{ email }}</strong>.
+                 Sprawdź swoją skrzynkę (i folder spam), aby aktywować konto.
+               </p>
+               <v-btn color="primary" variant="text" @click="registrationSuccess = false; isLogin = true">Wróć do logowania</v-btn>
+            </v-card-text>
+            <v-card-text v-else>
               <v-form @submit.prevent="handleSubmit">
                 <v-text-field
                   label="Email"

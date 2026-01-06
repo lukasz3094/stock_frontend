@@ -36,7 +36,7 @@ export const useAuthStore = defineStore('auth', {
           email,
           password,
         });
-        await this.login(email, password);
+        // Registration successful, no auto-login
       } catch (error) {
         if (axios.isAxiosError(error)) {
           if (Array.isArray(error.response?.data?.detail)) {
